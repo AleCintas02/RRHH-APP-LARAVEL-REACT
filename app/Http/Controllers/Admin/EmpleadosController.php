@@ -75,22 +75,51 @@ class EmpleadosController extends Controller
      */
     public function edit(string $id)
     {
-        //
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        
+        try{
+            $validate = $request->validate([
+                'id_puesto' => 'required|exists:puestos,id',
+                'nombre' => 'required|string|max:255',
+                'apellido' => 'required|string|max:255',
+                'dni' => 'required|string|max:255',
+                'telefono' => 'nullable|string|max:255',
+                'sueldo_basico' => 'required|string|max:255',
+            ]);
+    
+            $empleado = Empleado::findOrFail($id);
+            $empleado->update($validate);
+    
+            return redirect()->route('agregarEmpleado')->with('success', 'empleado actualizado');
+        }catch(\Exception $e){
+            return redirect()->route('agregarEmpleado')->with('error', 'error al actualizar el empleado');
+        }
+
+        
+        
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        try{
+            $empleado = Empleado::findOrFail($id);
+            $empleado->delete();
+
+            return redirect()->route('agregarEmpleado')->with('success', "empleado eliminado");
+        }catch(\Exception $e){
+            return redirect()->route('agregarEmpleado')->with('error', "error al eliminar el empleado");
+        }
+        
+
+
     }
 }
