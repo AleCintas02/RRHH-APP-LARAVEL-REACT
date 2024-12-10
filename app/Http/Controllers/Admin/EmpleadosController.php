@@ -14,7 +14,15 @@ class EmpleadosController extends Controller
      */
     public function index()
     {
-        $empleados = Empleado::with('puesto')->get(); // Carga también la relación con Puesto
+        $empleados = Empleado::with('puesto')->get()->map(function($empleado){
+
+            $porcentaje = $empleado->sueldo_basico * 0.21;
+            $sueldo_neto = $empleado->sueldo_basico - $porcentaje;
+
+            $empleado->sueldo_neto = $sueldo_neto;
+
+            return $empleado;
+        });
         return response()->json($empleados);   
     
     }
@@ -32,19 +40,26 @@ class EmpleadosController extends Controller
      */
     public function store(Request $request)
     {
-        $validate = $request->validate([
-            'id_puesto' =>'required|exists:puestos,id',
-            'nombre' => 'required|string|max:255',
-            'apellido' => 'required|string|max:255',
-            'dni' => 'required|string|max:20',
-            'telefono' => 'nullable|string|max:20',
-            'sueldo_basico' => 'required|numeric',
-        ]);
 
-        Empleado::create($validate);
+        try{
+            $validate = $request->validate([
+                'id_puesto' =>'required|exists:puestos,id',
+                'nombre' => 'required|string|max:255',
+                'apellido' => 'required|string|max:255',
+                'dni' => 'required|string|max:20|unique:empleados,dni',
+                'telefono' => 'nullable|string|max:20',
+                'sueldo_basico' => 'required|numeric',
+            ]);
 
-        return redirect()->route('agregarEmpleado')->with('success', 'Empleado registrado correctamente.');
 
+    
+            Empleado::create($validate);
+    
+            return redirect()->route('agregarEmpleado')->with('success', 'Empleado registrado correctamente.');
+        }catch(\Exeption $e){
+            return redirect()->route('agregarEmpleado')->with('success', 'Error al ingresar el empleado');
+        }
+    
     }
 
     /**

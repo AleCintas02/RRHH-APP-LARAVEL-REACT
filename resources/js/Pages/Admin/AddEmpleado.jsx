@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useForm } from '@inertiajs/react';
 
 function AddEmpleado() {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         id_puesto: '',
         nombre: '',
         apellido: '',
@@ -12,8 +12,9 @@ function AddEmpleado() {
         sueldo_basico: ''
     });
 
-    const [puestos, setPuestos] = useState([]); 
-    const [empleados, setEmpleados] = useState([]);  // Estado para los empleados
+    const [puestos, setPuestos] = useState([]);
+    const [empleados, setEmpleados] = useState([]);
+    const [isCollapsed, setIsCollapsed] = useState(false);  // Estado para controlar si el formulario está colapsado
 
     // Cargar los puestos desde la ruta `/puestos`
     useEffect(() => {
@@ -34,7 +35,16 @@ function AddEmpleado() {
     // Función para manejar el envío del formulario
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route('agregarEmpleadoPost'));  // Suponiendo que la ruta de creación de empleado sea 'empleadoStore'
+        post(route('agregarEmpleadoPost'), {
+            onSuccess: () => {
+                // Después de éxito, limpiar el formulario y recargar la lista de empleados
+                reset();
+                fetch('/listar-empleados')
+                    .then((response) => response.json())
+                    .then((data) => setEmpleados(data))
+                    .catch((error) => console.error('Error al cargar los empleados:', error));
+            }
+        });
     };
 
     return (
@@ -42,14 +52,26 @@ function AddEmpleado() {
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                     Registrar Empleado
+                    {/* Botón para alternar entre contraer y expandir el formulario */}
+                <button
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                    className=" ml-3 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-6 py-3 mb-4 transition-all duration-200 ease-in-out transform hover:scale-105"
+                >
+                    {isCollapsed ? 'Expandir Formulario' : 'Contraer Formulario'}
+                </button>
                 </h2>
+                
             }
         >
+
+
+
             {/* Formulario de empleado */}
-            <div className="max-w-2xl mx-auto px-6 py-8 bg-white shadow-md rounded-lg mt-3">
+            <div className={`max-w-2xl mx-auto px-6 py-8 bg-white shadow-lg rounded-lg mt-3 transition-all ${isCollapsed ? 'h-0 overflow-hidden' : ''}`}>
+                
                 <form onSubmit={handleSubmit}>
                     {/* Campos del formulario */}
-                    <div className="mb-4">
+                    <div className="mb-6">
                         <label htmlFor="id_puesto" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                             Puesto
                         </label>
@@ -58,7 +80,7 @@ function AddEmpleado() {
                             name="id_puesto"
                             value={data.id_puesto}
                             onChange={(e) => setData('id_puesto', e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
+                            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
                             required
                         >
                             <option value="">Seleccione un puesto</option>
@@ -72,7 +94,7 @@ function AddEmpleado() {
                     </div>
 
                     {/* Resto de los campos (nombre, apellido, etc.) */}
-                    <div className="mb-4">
+                    <div className="mb-6">
                         <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                             Nombre
                         </label>
@@ -82,13 +104,13 @@ function AddEmpleado() {
                             name="nombre"
                             value={data.nombre}
                             onChange={(e) => setData('nombre', e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
+                            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
                             required
                         />
                         {errors.nombre && <span className="text-red-500 text-xs">{errors.nombre}</span>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-6">
                         <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                             Apellido
                         </label>
@@ -98,13 +120,13 @@ function AddEmpleado() {
                             name="apellido"
                             value={data.apellido}
                             onChange={(e) => setData('apellido', e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
+                            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
                             required
                         />
                         {errors.apellido && <span className="text-red-500 text-xs">{errors.apellido}</span>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-6">
                         <label htmlFor="dni" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                             DNI
                         </label>
@@ -114,13 +136,13 @@ function AddEmpleado() {
                             name="dni"
                             value={data.dni}
                             onChange={(e) => setData('dni', e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
+                            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
                             required
                         />
                         {errors.dni && <span className="text-red-500 text-xs">{errors.dni}</span>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-6">
                         <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                             Teléfono (opcional)
                         </label>
@@ -130,12 +152,12 @@ function AddEmpleado() {
                             name="telefono"
                             value={data.telefono}
                             onChange={(e) => setData('telefono', e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
+                            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
                         />
                         {errors.telefono && <span className="text-red-500 text-xs">{errors.telefono}</span>}
                     </div>
 
-                    <div className="mb-4">
+                    <div className="mb-6">
                         <label htmlFor="sueldo_basico" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                             Sueldo Básico
                         </label>
@@ -145,7 +167,7 @@ function AddEmpleado() {
                             name="sueldo_basico"
                             value={data.sueldo_basico}
                             onChange={(e) => setData('sueldo_basico', e.target.value)}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
+                            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600"
                             required
                         />
                         {errors.sueldo_basico && <span className="text-red-500 text-xs">{errors.sueldo_basico}</span>}
@@ -155,7 +177,7 @@ function AddEmpleado() {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400"
+                            className="w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 disabled:bg-gray-400 transition duration-200"
                         >
                             {processing ? 'Registrando...' : 'Registrar Empleado'}
                         </button>
@@ -164,7 +186,7 @@ function AddEmpleado() {
             </div>
 
             {/* Tabla de empleados */}
-            <div className="max-w-4xl mx-auto px-6 py-8 bg-white shadow-md rounded-lg mt-8">
+            <div className="max-w-4xl mx-auto px-6 py-8 bg-white shadow-lg rounded-lg mt-8">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
                     Lista de Empleados
                 </h3>
@@ -172,23 +194,25 @@ function AddEmpleado() {
                     <table className="min-w-full table-auto border-collapse">
                         <thead>
                             <tr className="bg-gray-100">
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Puesto</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Nombre</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Apellido</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">DNI</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Teléfono</th>
-                                <th className="px-4 py-2 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Sueldo Básico</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Puesto</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Nombre</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Apellido</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">DNI</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Teléfono</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Sueldo Básico</th>
+                                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">Sueldo Neto</th>
                             </tr>
                         </thead>
                         <tbody>
                             {empleados.map((empleado) => (
                                 <tr key={empleado.id} className="border-b border-gray-200 dark:border-gray-700">
-                                    <td className="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{empleado.puesto.nombre}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{empleado.nombre}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{empleado.apellido}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{empleado.dni}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{empleado.telefono}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-800 dark:text-gray-200">{empleado.sueldo_basico}</td>
+                                    <td className="px-6 py-3 text-sm text-gray-800 dark:text-gray-200">{empleado.puesto.nombre}</td>
+                                    <td className="px-6 py-3 text-sm text-gray-800 dark:text-gray-200">{empleado.nombre}</td>
+                                    <td className="px-6 py-3 text-sm text-gray-800 dark:text-gray-200">{empleado.apellido}</td>
+                                    <td className="px-6 py-3 text-sm text-gray-800 dark:text-gray-200">{empleado.dni}</td>
+                                    <td className="px-6 py-3 text-sm text-gray-800 dark:text-gray-200">{empleado.telefono}</td>
+                                    <td className="px-6 py-3 text-sm text-gray-800 dark:text-gray-200">{empleado.sueldo_basico}</td>
+                                    <td className="px-6 py-3 text-sm text-gray-800 dark:text-gray-200">{empleado.sueldo_neto}</td>
                                 </tr>
                             ))}
                         </tbody>
