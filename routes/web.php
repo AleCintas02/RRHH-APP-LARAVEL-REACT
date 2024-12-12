@@ -34,14 +34,22 @@ Route::middleware([CheckAdmin::class])->group(function(){
     ->name('register');
     Route::post('register', [RegisteredUserController::class, 'store']);
 
+
+    //puestos
     Route::get('/agregar-puesto', [PuestosController::class, 'create'])->name('agregarPuesto');
     Route::post('/agregar-puesto', [PuestosController::class, 'store'])->name('agregarPuestoStore');
     Route::get('/puestos', [PuestosController::class, 'index'])->name('puestos');
     Route::delete('/puesto/{id}', [PuestosController::class, 'destroy'])->name('puestos.destroy'); 
+    Route::put('/editar-puesto/{id}', [PuestoController::class, 'update'])->name('editarEmpleado');
 
-    Route::get('/agregar-empleado', [EmpleadosController::class, 'create'])->name('agregarEmpleado');
-    Route::post('/agregar-empleado', [EmpleadosController::class, 'store'])->name('agregarEmpleadoPost');
+
+    //empleados
+    Route::get('/agregar-empleado', [EmpleadosController::class, 'create'])->name('agregarEmpleadoForm');
+    Route::post('/agregar-empleado', [EmpleadosController::class, 'store'])->name('agregarEmpleado');
     Route::get('/listar-empleados', [EmpleadosController::class, 'index'])->name('listarEmpleados');
+    Route::delete('/eliminar-empleado/{id}', [EmpleadosController::class, 'destroy'])->name('eliminarEmpleado');
+    Route::get('/editar-empleado-form/{id}', [EmpleadosController::class, 'edit'])->name('editarEmpleadoForm');
+    Route::put('/editar-empleado/{id}', [EmpleadosController::class, 'update'])->name('editarEmpleado');
 });
     
 
